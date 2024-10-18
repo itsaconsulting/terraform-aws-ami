@@ -34,7 +34,7 @@ variable "vpc_id" {
 variable "tags" {
   type        = map(string)
   description = "The tags to apply to the resources."
-  default    = {
+  default = {
     "Name"        = "codebuild-ami"
     "Environment" = "development"
   }
