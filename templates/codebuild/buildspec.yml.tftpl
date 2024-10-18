@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - sudo dnf install -y dnf-utils
+      - sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+      - sudo dnf install -y packer
+      - sudo dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm
+
+  build:
+    commands:
+      - "packer init ."
+      - "packer validate -var 'subnet_id=${subnet_id}' ."
+      - "packer build -var 'subnet_id=${subnet_id}' ."
+
+  post_build:
+    commands:
+      - last_run_uuid=$(cat manifest.json | jq -r '.last_run_uuid')
+      - echo "Last Run UUID  $${last_run_uuid}"
+      - "export ami_id=$(cat manifest.json | jq -r --arg last_run_uuid $${last_run_uuid} '.builds[] | select(.packer_run_uuid | contains($last_run_uuid)) | .artifact_id' | cut -d: -f2)"
+      - echo "AMI ID  $${ami_id}"
+      - "aws ssm put-parameter --overwrite --name ${ssm_parameter_name} --value $${ami_id} --type String --data-type 'aws:ec2:image'"
