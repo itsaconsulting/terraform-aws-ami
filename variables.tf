@@ -18,7 +18,7 @@ variable "ami_source" {
 variable "ami_ssm_parameter_name" {
   type        = string
   description = "The SSM Parameter to store the AMI ID in, after it is created."
-  default     = "/amis/linux/nat-gateway"
+  default     = "/amis/linux/codebuild-ami"
 }
 
 variable "subnet_id" {
@@ -34,6 +34,10 @@ variable "vpc_id" {
 variable "tags" {
   type        = map(string)
   description = "The tags to apply to the resources."
+  default    = {
+    "Name"        = "codebuild-ami"
+    "Environment" = "development"
+  }
 }
 
 variable "security_group_name_prefix" {
