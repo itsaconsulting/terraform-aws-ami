@@ -18,6 +18,8 @@ phases:
     commands:
       - last_run_uuid=$(cat manifest.json | jq -r '.last_run_uuid')
       - echo "Last Run UUID  $${last_run_uuid}"
+      - "export region=$(cat manifest.json | jq -r --arg last_run_uuid $${last_run_uuid} '.builds[] | select(.packer_run_uuid | contains($last_run_uuid)) | .artifact_id' | cut -d: -f1)"
       - "export ami_id=$(cat manifest.json | jq -r --arg last_run_uuid $${last_run_uuid} '.builds[] | select(.packer_run_uuid | contains($last_run_uuid)) | .artifact_id' | cut -d: -f2)"
+      - echo "Region  $${region}"
       - echo "AMI ID  $${ami_id}"
       - "aws ssm put-parameter --overwrite --name ${ssm_parameter_name} --value $${ami_id} --type String --data-type 'aws:ec2:image'"

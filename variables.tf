@@ -17,13 +17,13 @@ variable "ami_source" {
 
 variable "ami_ssm_parameter_name" {
   type        = string
-  description = "The SSM Parameter to store the AMI ID in, after it is created."
-  default     = "/amis/linux/codebuild-ami"
+  description = "The SSM Parameter to store the AMI ID in, after it is created.  This should include the region, so be sure to customize for your environment."
+  default     = "/amis/linux/us-west-2/codebuild-ami-nat-gateway"
 }
 
 variable "subnet_id" {
   type        = string
-  description = "The ID of the subnet to build the AMI in."
+  description = "The ID of the subnet to build the AMI in.  This should be a private subnet, with appropriate Nat Gateway or equivalent route to the internet."
 }
 
 variable "vpc_id" {
@@ -61,5 +61,17 @@ variable "ami_codebuild_policy_name_prefix" {
 variable "codebuild_project_name" {
   type        = string
   description = "The name to apply to the CodeBuild project."
-  default     = "codebuild-project-ami-project"
+  default     = "codebuild-project-ami"
+}
+
+variable "aws_cloudwatch_event_rule_schedule" {
+  type        = string
+  description = "The schedule to trigger the AMI build on.  This is optional so that no trigger will be created if this is left blank."
+  default     = ""
+}
+
+variable "branch" {
+  type        = string
+  description = "The branch to trigger the AMI build on, when commits are pushed."
+  default     = "main"
 }

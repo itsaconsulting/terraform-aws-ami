@@ -2,8 +2,9 @@ resource "aws_ssm_parameter" "ami" {
   name      = var.ami_ssm_parameter_name
   type      = "String"
   data_type = "aws:ec2:image"
-  value     = "ami-00000000000000000"
+  value     = "ami-07c5ecd8498c59db5"
 
+  # ignore updates to the value, as it is managed by the AMI build process
   lifecycle {
     ignore_changes = [
       value
@@ -232,7 +233,56 @@ resource "aws_codebuild_webhook" "ami_build_webhook" {
 
     filter {
       type    = "HEAD_REF"
-      pattern = "refs/heads/main"
+      pattern = "refs/heads/${var.branch}"
     }
   }
+}
+
+resource "aws_iam_role" "cloudwatch_event_role" {
+  name = "cloudwatch-event-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "events.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_policy" "cloudwatch_event_policy" {
+  name        = "cloudwatch-event-policy"
+  description = "Allow CloudWatch Events to trigger the AMI build."
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = "codebuild:StartBuild",
+        Resource = aws_codebuild_project.ami_build.arn
+      }
+    ]
+  })
+}
+
+resource "aws_cloudwatch_event_rule" "ami_build_trigger" {
+  count               = var.aws_cloudwatch_event_rule_schedule != "" ? 1 : 0
+  name                = "ami-build-trigger"
+  description         = "Trigger the AMI build on this schedule."
+  schedule_expression = "cron(${var.aws_cloudwatch_event_rule_schedule})"
+}
+
+resource "aws_cloudwatch_event_target" "ami_build_trigger_target" {
+  count     = var.aws_cloudwatch_event_rule_schedule != "" ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.ami_build_trigger[0].name
+  target_id = aws_codebuild_project.ami_build.name
+  arn       = aws_codebuild_project.ami_build.arn
+  role_arn  = aws_iam_role.cloudwatch_event_role.arn
 }
