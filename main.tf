@@ -1,3 +1,6 @@
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
 resource "aws_ssm_parameter" "ami" {
   name      = var.ami_ssm_parameter_name
   type      = "String"
@@ -137,14 +140,14 @@ resource "aws_iam_role_policy" "ami_codebuild_policy" {
         "Action" : [
           "ec2:CreateNetworkInterfacePermission"
         ],
-        "Resource" : "arn:aws:ec2:${var.aws_region}:${var.aws_account_id}:network-interface/*",
+        "Resource" : "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:network-interface/*",
         "Condition" : {
           "StringEquals" : {
             "ec2:AuthorizedService" : "codebuild.amazonaws.com"
           },
           "ArnEquals" : {
             "ec2:Subnet" : [
-              "arn:aws:ec2:${var.aws_region}:${var.aws_account_id}:subnet/${var.subnet_id}"
+              "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:subnet/${var.subnet_id}"
             ]
           }
         }

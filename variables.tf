@@ -1,14 +1,3 @@
-variable "aws_account_id" {
-  type        = string
-  description = "The AWS account ID to create resources in."
-}
-
-variable "aws_region" {
-  type        = string
-  description = "The AWS Region to create the CodeBuild project and AMI in."
-  default     = "us-west-2"
-}
-
 variable "ami_source" {
   type        = string
   description = "The link to the GitHub project that contains the packer build definition."
