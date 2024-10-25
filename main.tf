@@ -227,6 +227,7 @@ resource "aws_codebuild_project" "ami_build" {
 }
 
 resource "aws_codebuild_webhook" "ami_build_webhook" {
+  count        = var.create_webhook ? 1 : 0
   project_name = aws_codebuild_project.ami_build.name
   filter_group {
     filter {

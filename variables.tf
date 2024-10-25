@@ -64,3 +64,9 @@ variable "branch" {
   description = "The branch to trigger the AMI build on, when commits are pushed."
   default     = "main"
 }
+
+variable "create_webhook" {
+  type        = bool
+  description = "Whether to create a webhook to trigger the AMI build on pushes to the branch."
+  default     = false
+}
