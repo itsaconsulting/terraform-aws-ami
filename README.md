@@ -1,7 +1,7 @@
 # terraform-aws-ami
 This terraform module will deploy a CodeBuild project that will build an AMI and place the AMI ID in an SSM Parameter.
 
-If the Packer repository is not public, this module requires an active CodeStar Connection to the Github repository where the packer definition is stored.
+If the Packer repository is not public or automated builds based on git PUSH are desired, this module requires an active CodeStar Connection to the Github repository where the packer definition is stored.
 
 The module supports running on a schedule, with the intent to facilitate routine build and deploy models, ie, build a new AMI weekly to get all of the security and patching updates, and then deploy.
 
