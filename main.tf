@@ -276,6 +276,11 @@ resource "aws_iam_policy" "cloudwatch_event_policy" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "cloudwatch_event_policy_attachment" {
+  role       = aws_iam_role.cloudwatch_event_role.name
+  policy_arn = aws_iam_policy.cloudwatch_event_policy.arn
+}
+
 resource "aws_cloudwatch_event_rule" "ami_build_trigger" {
   count               = var.aws_cloudwatch_event_rule_schedule != "" ? 1 : 0
   name                = "ami-build-trigger"
